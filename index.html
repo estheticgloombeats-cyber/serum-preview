@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
 <title>Serum Preset Preview</title>
 
 <style>
@@ -10,118 +9,118 @@ html, body {
   margin: 0;
   padding: 0;
   background: #000;
-  overflow: hidden;
   font-family: monospace;
-  color: #00ff88;
+  color: #00ff9c;
+  overflow: hidden;
 }
 
+/* WRAPPER */
 #app {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* VIDEO */
-#video {
-  width: 90%;
-  max-width: 1100px;
-  border-radius: 10px;
-  background: black;
+#video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
 }
 
-/* MIDI KEYS */
-#keys {
-  display: flex;
-  margin-top: 20px;
-  gap: 6px;
-}
-
-.key {
-  width: 70px;
-  height: 80px;
-  border: 1px solid #00ff88;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 8px;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.1s, transform 0.05s;
-}
-
-.key:active {
-  background: #00ff8833;
-  transform: translateY(2px);
-}
-
-/* PRESET NAV */
-#preset-nav {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.nav-btn {
-  cursor: pointer;
-  font-size: 22px;
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 /* LOADER */
 #loader {
   position: absolute;
   inset: 0;
-  background: black;
+  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
-  flex-direction: column;
+  font-size: 18px;
+  letter-spacing: 2px;
+  animation: flicker 1.2s infinite;
+  z-index: 5;
 }
 
-#loader.hidden {
+.hidden {
   display: none;
 }
 
-#loader-text {
-  letter-spacing: 2px;
-  animation: flicker 1.6s infinite;
+@keyframes flicker {
+  0% { opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { opacity: 0.2; }
 }
 
-@keyframes flicker {
-  0% { opacity: 0.2 }
-  20% { opacity: 1 }
-  40% { opacity: 0.4 }
-  60% { opacity: 1 }
-  80% { opacity: 0.6 }
-  100% { opacity: 1 }
+/* PRESET NAV */
+#preset-nav {
+  margin: 15px 0;
+  text-align: center;
+}
+
+.arrow {
+  cursor: pointer;
+  padding: 0 15px;
+  font-size: 18px;
+}
+
+#preset-name {
+  display: inline-block;
+  min-width: 120px;
+}
+
+/* KEYS */
+#keys {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.key {
+  width: 70px;
+  height: 140px;
+  border: 1px solid #00ff9c;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.05s;
+}
+
+.key:active {
+  background: rgba(0,255,156,0.2);
 }
 </style>
 </head>
 
 <body>
+
 <div id="app">
 
-  <!-- LOADER -->
-  <div id="loader">
-    <div id="loader-text">LOADING PRESETS…</div>
+  <div id="video-wrap">
+    <div id="loader">LOADING PRESETS…</div>
+    <video id="video" muted playsinline></video>
   </div>
 
-  <!-- VIDEO -->
-  <video id="video" muted playsinline preload="auto"></video>
-
-  <!-- PRESET NAV -->
   <div id="preset-nav">
-    <div class="nav-btn" id="prev">◀</div>
-    <div id="preset-name">PRESET 01</div>
-    <div class="nav-btn" id="next">▶</div>
+    <span class="arrow" id="prev">◀</span>
+    <span id="preset-name">PRESET 01</span>
+    <span class="arrow" id="next">▶</span>
   </div>
 
-  <!-- KEYS -->
   <div id="keys">
     <div class="key" data-note="C">C</div>
     <div class="key" data-note="D">D</div>
@@ -134,83 +133,76 @@ html, body {
 
 </div>
 
+<audio id="audio"></audio>
+
 <script>
 const presets = [
-  { name: "PRESET 01", video: "preset01.mp4", audio: "preset01.mp3" },
-  { name: "PRESET 02", video: "preset02.mp4", audio: "preset02.mp3" },
-  { name: "PRESET 03", video: "preset03.mp4", audio: "preset03.mp3" }
+  {
+    name: "PRESET 01",
+    video: "videos/preset1.mp4",
+    audio: {
+      C: "audio/p1_C.wav",
+      D: "audio/p1_D.wav",
+      E: "audio/p1_E.wav",
+      F: "audio/p1_F.wav",
+      G: "audio/p1_G.wav",
+      A: "audio/p1_A.wav",
+      B: "audio/p1_B.wav"
+    }
+  }
 ];
 
-let current = 0;
-let ready = false;
-
+let index = 0;
 const video = document.getElementById("video");
-const audio = new Audio();
-audio.preload = "auto";
-
+const audio = document.getElementById("audio");
 const loader = document.getElementById("loader");
 const presetName = document.getElementById("preset-name");
 
-function loadPreset(index) {
-  ready = false;
-  loader.classList.remove("hidden");
+/* LOADER FAILSAFE */
+setTimeout(() => {
+  loader.classList.add("hidden");
+}, 4000);
 
-  const p = presets[index];
+/* LOAD PRESET */
+function loadPreset(i) {
+  const p = presets[i];
   presetName.textContent = p.name;
 
   video.src = p.video;
-  audio.src = p.audio;
-
-  let unlocked = false;
-
-  // FAILSAFE: снять loader через 5 секунд в любом случае
-  const forceUnlock = setTimeout(() => {
-    if (!unlocked) unlock();
-  }, 5000);
-
-  function unlock() {
-    unlocked = true;
-    ready = true;
-    loader.classList.add("hidden");
-    clearTimeout(forceUnlock);
-  }
-
-  audio.oncanplay = unlock;
-  video.onloadeddata = unlock;
-}
-
-
-
-function playNote() {
-  if (!ready) return;
-
-  audio.currentTime = 0;
-  audio.play().catch(()=>{});
-
-  video.pause();
   video.currentTime = 0;
   video.play().catch(()=>{});
 }
 
-document.querySelectorAll(".key").forEach(k => {
-  k.addEventListener("click", playNote);
-});
-
+/* NAV */
 document.getElementById("prev").onclick = () => {
-  current = (current - 1 + presets.length) % presets.length;
-  loadPreset(current);
+  index = (index - 1 + presets.length) % presets.length;
+  loadPreset(index);
 };
 
 document.getElementById("next").onclick = () => {
-  current = (current + 1) % presets.length;
-  loadPreset(current);
+  index = (index + 1) % presets.length;
+  loadPreset(index);
 };
 
-window.addEventListener("load", () => {
-  loadPreset(current);
+/* KEYS = USER GESTURE */
+document.querySelectorAll(".key").forEach(key => {
+  key.addEventListener("mousedown", () => {
+    const note = key.dataset.note;
+    const src = presets[index].audio[note];
+
+    audio.pause();
+    audio.src = src;
+    audio.currentTime = 0;
+    audio.play();
+
+    video.currentTime = 0;
+    video.play().catch(()=>{});
+  });
 });
+
+/* INIT */
+loadPreset(index);
 </script>
+
 </body>
 </html>
-
-
