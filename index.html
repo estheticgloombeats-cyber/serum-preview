@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Serum Preset Preview</title>
 
 <style>
@@ -9,98 +10,118 @@ html, body {
   margin: 0;
   padding: 0;
   background: #000;
-  font-family: monospace;
-  color: #00ff9c;
-}
-
-#frame {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-#screen {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: #000;
   overflow: hidden;
+  font-family: monospace;
+  color: #00ff88;
 }
 
-video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-#loader {
-  position: absolute;
-  inset: 0;
+#app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  letter-spacing: 2px;
-  animation: blink 1s infinite;
 }
 
-@keyframes blink {
-  0% { opacity: .2 }
-  50% { opacity: 1 }
-  100% { opacity: .2 }
+/* VIDEO */
+#video {
+  width: 90%;
+  max-width: 1100px;
+  border-radius: 10px;
+  background: black;
 }
 
-#controls {
-  margin-top: 12px;
-  text-align: center;
-}
-
-.arrow {
-  cursor: pointer;
-  padding: 0 15px;
-}
-
+/* MIDI KEYS */
 #keys {
-  margin-top: 20px;
   display: flex;
-  justify-content: center;
+  margin-top: 20px;
   gap: 6px;
 }
 
 .key {
   width: 70px;
-  height: 140px;
-  border: 1px solid #00ff9c;
+  height: 80px;
+  border: 1px solid #00ff88;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
   cursor: pointer;
+  user-select: none;
+  transition: background 0.1s, transform 0.05s;
 }
 
 .key:active {
-  background: rgba(0,255,156,0.2);
+  background: #00ff8833;
+  transform: translateY(2px);
+}
+
+/* PRESET NAV */
+#preset-nav {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-btn {
+  cursor: pointer;
+  font-size: 22px;
+}
+
+/* LOADER */
+#loader {
+  position: absolute;
+  inset: 0;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  flex-direction: column;
+}
+
+#loader.hidden {
+  display: none;
+}
+
+#loader-text {
+  letter-spacing: 2px;
+  animation: flicker 1.6s infinite;
+}
+
+@keyframes flicker {
+  0% { opacity: 0.2 }
+  20% { opacity: 1 }
+  40% { opacity: 0.4 }
+  60% { opacity: 1 }
+  80% { opacity: 0.6 }
+  100% { opacity: 1 }
 }
 </style>
 </head>
 
 <body>
+<div id="app">
 
-<div id="frame">
-
-  <div id="screen">
-    <div id="loader">LOADING PRESETS…</div>
-    <video id="video" muted playsinline></video>
+  <!-- LOADER -->
+  <div id="loader">
+    <div id="loader-text">LOADING PRESETS…</div>
   </div>
 
-  <div id="controls">
-    <span class="arrow" id="prev">◀</span>
-    <span id="name">PRESET 01</span>
-    <span class="arrow" id="next">▶</span>
+  <!-- VIDEO -->
+  <video id="video" muted playsinline preload="auto"></video>
+
+  <!-- PRESET NAV -->
+  <div id="preset-nav">
+    <div class="nav-btn" id="prev">◀</div>
+    <div id="preset-name">PRESET 01</div>
+    <div class="nav-btn" id="next">▶</div>
   </div>
 
+  <!-- KEYS -->
   <div id="keys">
     <div class="key" data-note="C">C</div>
     <div class="key" data-note="D">D</div>
@@ -115,36 +136,54 @@ video {
 
 <script>
 const presets = [
-  {
-    name: "PRESET 01",
-    video: "videos/preset1.mp4",
-    audio: {
-      C: "audio/p1_C.wav",
-      D: "audio/p1_D.wav",
-      E: "audio/p1_E.wav",
-      F: "audio/p1_F.wav",
-      G: "audio/p1_G.wav",
-      A: "audio/p1_A.wav",
-      B: "audio/p1_B.wav"
-    }
-  }
+  { name: "PRESET 01", video: "preset01.mp4", audio: "preset01.mp3" },
+  { name: "PRESET 02", video: "preset02.mp4", audio: "preset02.mp3" },
+  { name: "PRESET 03", video: "preset03.mp4", audio: "preset03.mp3" }
 ];
 
 let current = 0;
+let ready = false;
+
 const video = document.getElementById("video");
+const audio = new Audio();
+audio.preload = "auto";
+
 const loader = document.getElementById("loader");
-const name = document.getElementById("name");
+const presetName = document.getElementById("preset-name");
 
-setTimeout(() => {
-  loader.style.display = "none";
-}, 3000);
+function loadPreset(index) {
+  ready = false;
+  loader.classList.remove("hidden");
 
-function loadPreset(i) {
-  const p = presets[i];
-  name.textContent = p.name;
+  const p = presets[index];
+  presetName.textContent = p.name;
+
   video.src = p.video;
-  video.currentTime = 0;
+  audio.src = p.audio;
+
+  Promise.all([
+    new Promise(res => video.oncanplaythrough = res),
+    new Promise(res => audio.oncanplaythrough = res)
+  ]).then(() => {
+    ready = true;
+    loader.classList.add("hidden");
+  });
 }
+
+function playNote() {
+  if (!ready) return;
+
+  audio.currentTime = 0;
+  audio.play().catch(()=>{});
+
+  video.pause();
+  video.currentTime = 0;
+  video.play().catch(()=>{});
+}
+
+document.querySelectorAll(".key").forEach(k => {
+  k.addEventListener("click", playNote);
+});
 
 document.getElementById("prev").onclick = () => {
   current = (current - 1 + presets.length) % presets.length;
@@ -156,21 +195,9 @@ document.getElementById("next").onclick = () => {
   loadPreset(current);
 };
 
-document.querySelectorAll(".key").forEach(k => {
-  k.addEventListener("mousedown", () => {
-    const note = k.dataset.note;
-    const src = presets[current].audio[note];
-
-    const audio = new Audio(src);
-    audio.play();
-
-    video.currentTime = 0;
-    video.play().catch(()=>{});
-  });
+window.addEventListener("load", () => {
+  loadPreset(current);
 });
-
-loadPreset(current);
 </script>
-
 </body>
 </html>
