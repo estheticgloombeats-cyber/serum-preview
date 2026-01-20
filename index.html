@@ -161,14 +161,27 @@ function loadPreset(index) {
   video.src = p.video;
   audio.src = p.audio;
 
-  Promise.all([
-    new Promise(res => video.oncanplaythrough = res),
-    new Promise(res => audio.oncanplaythrough = res)
-  ]).then(() => {
-    ready = true;
-    loader.classList.add("hidden");
-  });
+  let audioReady = false;
+  let videoReady = false;
+
+  audio.oncanplay = () => {
+    audioReady = true;
+    checkReady();
+  };
+
+  video.onloadeddata = () => {
+    videoReady = true;
+    checkReady();
+  };
+
+  function checkReady() {
+    if (audioReady && videoReady) {
+      ready = true;
+      loader.classList.add("hidden");
+    }
+  }
 }
+
 
 function playNote() {
   if (!ready) return;
