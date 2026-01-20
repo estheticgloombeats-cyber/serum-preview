@@ -161,26 +161,24 @@ function loadPreset(index) {
   video.src = p.video;
   audio.src = p.audio;
 
-  let audioReady = false;
-  let videoReady = false;
+  let unlocked = false;
 
-  audio.oncanplay = () => {
-    audioReady = true;
-    checkReady();
-  };
+  // FAILSAFE: снять loader через 5 секунд в любом случае
+  const forceUnlock = setTimeout(() => {
+    if (!unlocked) unlock();
+  }, 5000);
 
-  video.onloadeddata = () => {
-    videoReady = true;
-    checkReady();
-  };
-
-  function checkReady() {
-    if (audioReady && videoReady) {
-      ready = true;
-      loader.classList.add("hidden");
-    }
+  function unlock() {
+    unlocked = true;
+    ready = true;
+    loader.classList.add("hidden");
+    clearTimeout(forceUnlock);
   }
+
+  audio.oncanplay = unlock;
+  video.onloadeddata = unlock;
 }
+
 
 
 function playNote() {
