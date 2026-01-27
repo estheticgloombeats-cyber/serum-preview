@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Serum Preset Preview</title>
+<title>PAL Serum Preset Preview</title>
 
 <style>
 body {
   margin: 0;
   padding: 40px;
-  background: radial-gradient(circle at center, #0f140f, #050705);
+  background: radial-gradient(circle at center, #0a0f1f, #02040a);
   font-family: monospace;
-  color: #9cff9c;
+  color: #e6f0ff;
   display: flex;
   justify-content: center;
 }
@@ -31,13 +31,13 @@ body {
 .loader {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.95);
+  background: rgba(0,0,20,0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
-  letter-spacing: 3px;
-  color: #2aff2a;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: #7db3ff;
   z-index: 50;
   animation: pulse 1.2s infinite;
 }
@@ -54,6 +54,7 @@ video {
   display: block;
   border-radius: 8px;
   background: #000;
+  box-shadow: 0 0 25px rgba(120,160,255,0.25);
 }
 
 /* PRESET LABEL */
@@ -61,10 +62,12 @@ video {
   position: absolute;
   bottom: 12px;
   left: 16px;
-  background: rgba(0,0,0,0.65);
-  padding: 6px 10px;
+  background: rgba(0,0,0,0.6);
+  padding: 6px 12px;
   font-size: 13px;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  color: #ffffff;
+  border: 1px solid #7db3ff;
 }
 
 /* NAV BUTTONS */
@@ -72,17 +75,19 @@ video {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0,0,0,0.75);
-  border: 1px solid #2aff2a;
-  color: #9cff9c;
-  padding: 12px 16px;
+  background: rgba(0,0,40,0.8);
+  border: 1px solid #7db3ff;
+  color: #ffffff;
+  padding: 12px 18px;
   font-size: 18px;
   cursor: pointer;
   user-select: none;
+  transition: all 0.2s ease;
 }
 
 .nav:hover {
-  background: rgba(0,0,0,0.95);
+  background: rgba(30,60,120,0.9);
+  box-shadow: 0 0 12px rgba(120,160,255,0.7);
 }
 
 .prev { left: 10px; }
@@ -96,12 +101,13 @@ video {
   user-select: none;
 }
 
+/* WHITE KEYS */
 .key.white {
   float: left;
   width: calc(100% / 8);
   height: 130px;
-  background: linear-gradient(#1a1a1a, #0b0b0b);
-  border: 1px solid #2aff2a;
+  background: linear-gradient(#f0f6ff, #c9d9ff);
+  border: 1px solid #7db3ff;
   box-sizing: border-box;
   cursor: pointer;
   display: flex;
@@ -109,20 +115,22 @@ video {
   align-items: flex-end;
   padding-bottom: 8px;
   font-size: 12px;
+  color: #001133;
 }
 
+/* BLACK KEYS */
 .key.black {
   position: absolute;
   top: 0;
   width: 34px;
   height: 80px;
-  background: linear-gradient(#000, #111);
-  border: 1px solid #2aff2a;
+  background: linear-gradient(#050b18, #0a1225);
+  border: 1px solid #7db3ff;
   z-index: 5;
   cursor: pointer;
 }
 
-/* BLACK KEYS */
+/* BLACK KEYS POSITION */
 .b1 { left: 10%; }
 .b2 { left: 22.5%; }
 .b3 { left: 47.5%; }
@@ -130,9 +138,9 @@ video {
 .b5 { left: 72.5%; }
 
 .key:active {
-  background: #2aff2a !important;
+  background: #7db3ff !important;
   color: #000;
-  box-shadow: 0 0 14px #2aff2a;
+  box-shadow: 0 0 16px #7db3ff;
 }
 </style>
 </head>
@@ -142,7 +150,7 @@ video {
 <div class="preview" id="preview">
 
   <div class="loader" id="loader">
-    LOADING PRESETS…
+    LOADING PAL PRESETS…
   </div>
 
   <video id="video" loop muted playsinline></video>
@@ -173,9 +181,24 @@ video {
 
 <script>
 const presets = [
-  { name: "STRINGS 06", video: "preset01.mp4", audio: "preset01.wav" },
-  { name: "DRONE 02",   video: "preset02.mp4", audio: "preset02.wav" },
-  { name: "BASS 04",    video: "preset03.mp4", audio: "preset03.wav" }
+  { name: "PAL 01", video: "preset01.mp4", audio: "preset01.mp3" },
+  { name: "PAL 02", video: "preset02.mp4", audio: "preset02.mp3" },
+  { name: "PAL 03", video: "preset03.mp4", audio: "preset03.mp3" },
+  { name: "PAL 04", video: "preset04.mp4", audio: "preset04.mp3" },
+  { name: "PAL 05", video: "preset05.mp4", audio: "preset05.mp3" },
+  { name: "PAL 06", video: "preset06.mp4", audio: "preset06.mp3" },
+  { name: "PAL 07", video: "preset07.mp4", audio: "preset07.mp3" },
+  { name: "PAL 08", video: "preset08.mp4", audio: "preset08.mp3" },
+  { name: "PAL 09", video: "preset09.mp4", audio: "preset09.mp3" },
+  { name: "PAL 10", video: "preset10.mp4", audio: "preset10.mp3" },
+  { name: "PAL 11", video: "preset11.mp4", audio: "preset11.mp3" },
+  { name: "PAL 12", video: "preset12.mp4", audio: "preset12.mp3" },
+  { name: "PAL 13", video: "preset13.mp4", audio: "preset13.mp3" },
+  { name: "PAL 14", video: "preset14.mp4", audio: "preset14.mp3" },
+  { name: "PAL 15", video: "preset15.mp4", audio: "preset15.mp3" },
+  { name: "PAL 16", video: "preset16.mp4", audio: "preset16.mp3" },
+  { name: "PAL 17", video: "preset17.mp4", audio: "preset17.mp3" },
+  { name: "PAL 18", video: "preset18.mp4", audio: "preset18.mp3" }
 ];
 
 let index = 0;
@@ -234,7 +257,7 @@ const loader = document.getElementById("loader");
 setTimeout(() => {
   loader.remove();
   preview.classList.add("ready");
-}, 2500);
+}, 2200);
 </script>
 
 </body>
