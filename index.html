@@ -93,11 +93,34 @@ video {
 .prev { left: 10px; }
 .next { right: 10px; }
 
+/* VOLUME */
+.volume {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #bcd7ff;
+}
+
+.volume input[type=range] {
+  width: 160px;
+}
+
+/* DISCLAIMER */
+.disclaimer {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #9bb7ff;
+  opacity: 0.7;
+  text-align: center;
+}
+
 /* KEYBOARD */
 .keyboard {
   position: relative;
   height: 130px;
-  margin-top: 18px;
+  margin-top: 16px;
   user-select: none;
 }
 
@@ -177,6 +200,15 @@ video {
     <div class="key black b5" onclick="playNote(10)"></div>
   </div>
 
+  <div class="volume">
+    VOLUME
+    <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.7">
+  </div>
+
+  <div class="disclaimer">
+    Presets are for preview purposes only and may not represent the final product quality.
+  </div>
+
 </div>
 
 <script>
@@ -204,16 +236,25 @@ const presets = [
 let index = 0;
 const video = document.getElementById("video");
 const label = document.getElementById("presetLabel");
+const volumeControl = document.getElementById("volumeControl");
 
 let audioCtx;
 let source;
+let gainNode;
 const bufferCache = {};
 
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
+    gainNode.gain.value = volumeControl.value;
   }
 }
+
+volumeControl.addEventListener("input", () => {
+  if (gainNode) gainNode.gain.value = volumeControl.value;
+});
 
 function loadPreset(i) {
   index = (i + presets.length) % presets.length;
@@ -239,7 +280,7 @@ async function playNote(semitones) {
   source = audioCtx.createBufferSource();
   source.buffer = bufferCache[index];
   source.playbackRate.value = Math.pow(2, semitones / 12);
-  source.connect(audioCtx.destination);
+  source.connect(gainNode);
   source.start();
 
   video.currentTime = 0;
