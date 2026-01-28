@@ -5,19 +5,19 @@
 <title>PAL Serum Preset Preview</title>
 
 <style>
-body {
+html, body {
   margin: 0;
-  padding: 40px;
-  background: radial-gradient(circle at center, #0a0f1f, #02040a);
+  padding: 0;
+  background: #011560;
   font-family: monospace;
-  color: #e6f0ff;
-  display: flex;
-  justify-content: center;
+  color: #ffffff;
 }
 
 /* MAIN BLOCK */
 .preview {
-  width: 960px;
+  width: 100%;
+  max-width: 960px;
+  margin: 16px auto;
   position: relative;
   opacity: 0;
   transition: opacity 0.8s ease;
@@ -31,13 +31,13 @@ body {
 .loader {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,20,0.95);
+  background: rgba(1,21,96,0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  letter-spacing: 4px;
-  color: #7db3ff;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #ffffff;
   z-index: 50;
   animation: pulse 1.2s infinite;
 }
@@ -52,22 +52,22 @@ body {
 video {
   width: 100%;
   display: block;
-  border-radius: 8px;
-  background: #000;
-  box-shadow: 0 0 25px rgba(120,160,255,0.25);
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: 0 0 12px rgba(255,255,255,0.2);
 }
 
 /* PRESET LABEL */
 .label {
   position: absolute;
-  bottom: 12px;
-  left: 16px;
-  background: rgba(0,0,0,0.6);
-  padding: 6px 12px;
-  font-size: 13px;
+  bottom: 10px;
+  left: 12px;
+  background: rgba(0,0,0,0.4);
+  padding: 5px 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: #ffffff;
-  border: 1px solid #7db3ff;
+  border: 1px solid #ffffff;
 }
 
 /* NAV BUTTONS */
@@ -75,29 +75,23 @@ video {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0,0,40,0.8);
-  border: 1px solid #7db3ff;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid #ffffff;
   color: #ffffff;
-  padding: 12px 18px;
-  font-size: 18px;
+  padding: 10px 14px;
+  font-size: 16px;
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
 }
 
-.nav:hover {
-  background: rgba(30,60,120,0.9);
-  box-shadow: 0 0 12px rgba(120,160,255,0.7);
-}
-
-.prev { left: 10px; }
-.next { right: 10px; }
+.prev { left: 8px; }
+.next { right: 8px; }
 
 /* KEYBOARD */
 .keyboard {
   position: relative;
-  height: 130px;
-  margin-top: 18px;
+  height: 120px;
+  margin-top: 14px;
   user-select: none;
 }
 
@@ -105,27 +99,27 @@ video {
 .key.white {
   float: left;
   width: calc(100% / 8);
-  height: 130px;
-  background: linear-gradient(#f0f6ff, #c9d9ff);
-  border: 1px solid #7db3ff;
+  height: 120px;
+  background: linear-gradient(#ffffff, #dbe7ff);
+  border: 1px solid #ffffff;
   box-sizing: border-box;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-bottom: 8px;
-  font-size: 12px;
-  color: #001133;
+  padding-bottom: 6px;
+  font-size: 11px;
+  color: #011560;
 }
 
 /* BLACK KEYS */
 .key.black {
   position: absolute;
   top: 0;
-  width: 34px;
-  height: 80px;
-  background: linear-gradient(#050b18, #0a1225);
-  border: 1px solid #7db3ff;
+  width: 28px;
+  height: 70px;
+  background: linear-gradient(#001033, #00081a);
+  border: 1px solid #ffffff;
   z-index: 5;
   cursor: pointer;
 }
@@ -138,9 +132,35 @@ video {
 .b5 { left: 72.5%; }
 
 .key:active {
-  background: #7db3ff !important;
-  color: #000;
-  box-shadow: 0 0 16px #7db3ff;
+  background: #ffffff !important;
+  color: #011560;
+  box-shadow: 0 0 10px #ffffff;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .keyboard {
+    height: 90px;
+  }
+
+  .key.white {
+    height: 90px;
+    font-size: 10px;
+  }
+
+  .key.black {
+    width: 22px;
+    height: 55px;
+  }
+
+  .nav {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .label {
+    font-size: 10px;
+  }
 }
 </style>
 </head>
@@ -150,7 +170,7 @@ video {
 <div class="preview" id="preview">
 
   <div class="loader" id="loader">
-    LOADING PAL PRESETS…
+    TAP TO ENABLE AUDIO
   </div>
 
   <video id="video" loop muted playsinline></video>
@@ -213,7 +233,11 @@ function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
+  audioCtx.resume();
 }
+
+document.body.addEventListener("touchstart", initAudio, { once: true });
+document.body.addEventListener("click", initAudio, { once: true });
 
 function loadPreset(i) {
   index = (i + presets.length) % presets.length;
@@ -257,7 +281,7 @@ const loader = document.getElementById("loader");
 setTimeout(() => {
   loader.remove();
   preview.classList.add("ready");
-}, 2200);
+}, 1500);
 </script>
 
 </body>
